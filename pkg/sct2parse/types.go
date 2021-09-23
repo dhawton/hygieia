@@ -1,6 +1,6 @@
 /*
  * Hygieia - sct2 cleaner
- * Copyright (C) <year> <name of author
+ * Copyright (C) 2021 Daniel A. Hawton <daniel@hawton.com>
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -28,11 +28,13 @@ type Sct2Map struct {
 	Name        string
 	RawNameLine string
 	Lines       []Sct2Line
+	IsSID       bool
 }
 
 type Sct2Line struct {
-	Start Sct2Point
-	End   Sct2Point
+	Start  Sct2Point
+	End    Sct2Point
+	Remove bool
 }
 
 type Sct2Point struct {

@@ -1,6 +1,6 @@
 /*
  * Hygieia - sct2 cleaner
- * Copyright (C) <year> <name of author
+ * Copyright (C) 2021 Daniel A. Hawton <daniel@hawton.com>
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -20,6 +20,7 @@ package sct2parse
 
 import (
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 )
@@ -83,4 +84,35 @@ func ConvertSct2Point(latType string, latNumber string, lonType string, lonNumbe
 	}
 
 	return Sct2Point{lat, lon}, nil
+}
+
+func convertDDToDMS(dd float64) string {
+	deg := int(math.Floor(dd))
+	min := int(math.Floor((dd - float64(deg)) * 60))
+	sec := ((dd-float64(deg))*60 - float64(min)) * 60
+
+	return fmt.Sprintf("%03d.%d.%0.3f", deg, min, sec)
+}
+
+func ConvertToSct2(lat float64, lon float64) []string {
+	latNegative := lat < 0
+	lonNegative := lon < 0
+	latAbs := math.Abs(lat)
+	lonAbs := math.Abs(lon)
+	latString := convertDDToDMS(latAbs)
+	lonString := convertDDToDMS(lonAbs)
+
+	if latNegative {
+		latString = "S" + latString
+	} else {
+		latString = "N" + latString
+	}
+
+	if lonNegative {
+		lonString = "W" + lonString
+	} else {
+		lonString = "E" + lonString
+	}
+
+	return []string{latString, lonString}
 }

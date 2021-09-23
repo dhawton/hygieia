@@ -1,6 +1,6 @@
 /*
  * Hygieia - sct2 cleaner
- * Copyright (C) <year> <name of author
+ * Copyright (C) 2021 Daniel A. Hawton <daniel@hawton.com>
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -24,6 +24,6 @@ type Config struct {
 }
 
 type Point struct {
-	X float64 `yaml:"x"`
-	Y float64 `yaml:"y"`
+	Lat float64 `yaml:"lat"`
+	Lon float64 `yaml:"lon"`
 }

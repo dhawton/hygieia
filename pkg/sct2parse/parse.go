@@ -1,6 +1,6 @@
 /*
  * Hygieia - sct2 cleaner
- * Copyright (C) <year> <name of author
+ * Copyright (C) 2021 Daniel A. Hawton <daniel@hawton.com>
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -19,6 +19,7 @@
 package sct2parse
 
 import (
+	"fmt"
 	"regexp"
 
 	"hawton.dev/hygieia/pkg/utils"
@@ -46,6 +47,7 @@ func Parse(file string) (*Sct2, error) {
 
 	workingMap := Sct2Map{}
 	isInSlice := false
+	isSID := false
 	inMaps := false
 	inFixes := false
 
@@ -63,11 +65,17 @@ func Parse(file string) (*Sct2, error) {
 		if fixBlockRegex.MatchString(line) {
 			inMaps = false
 			inFixes = true
+			sct2.RawLines = append(sct2.RawLines, line)
 			continue
 		} else if sidRegex.MatchString(line) || starRegex.MatchString(line) {
 			if isInSlice {
 				sct2.Maps = append(sct2.Maps, workingMap)
 				isInSlice = false
+			}
+			if sidRegex.MatchString(line) {
+				isSID = true
+			} else {
+				isSID = false
 			}
 			inMaps = true
 			inFixes = false
@@ -84,6 +92,7 @@ func Parse(file string) (*Sct2, error) {
 		}
 
 		if inFixes {
+			sct2.RawLines = append(sct2.RawLines, line)
 			if fixRegex.MatchString(line) {
 				res := fixRegex.FindAllStringSubmatch(line, -1)
 				pt, err := ConvertSct2Point(res[0][2], res[0][3], res[0][4], res[0][5])
@@ -105,6 +114,7 @@ func Parse(file string) (*Sct2, error) {
 				workingMap = Sct2Map{
 					Name:        res[0][1],
 					RawNameLine: line,
+					IsSID:       isSID,
 				}
 				isInSlice = true
 			} else if isInSlice && lineFixRegex.MatchString(line) {
@@ -136,4 +146,35 @@ func Parse(file string) (*Sct2, error) {
 	}
 
 	return sct2, nil
+}
+
+func (s *Sct2) ToSct2() ([]string, error) {
+	lines := make([]string, 0)
+
+	lines = append(lines, s.RawLines...)
+
+	lines = append(lines, "[SID]")
+	lines = append(lines, s.getMaps(true)...)
+	lines = append(lines, "[STAR]")
+	lines = append(lines, s.getMaps(false)...)
+
+	return lines, nil
+}
+
+func (s *Sct2) getMaps(isSid bool) []string {
+	lines := make([]string, 0)
+	for _, mapData := range s.Maps {
+		if mapData.IsSID == isSid {
+			lines = append(lines, mapData.RawNameLine)
+			for _, line := range mapData.Lines {
+				if !line.Remove {
+					start := ConvertToSct2(line.Start.Lat, line.Start.Lon)
+					end := ConvertToSct2(line.End.Lat, line.End.Lon)
+					lines = append(lines, fmt.Sprintf("\t%s %s %s %s", start[0], start[1], end[0], end[1]))
+				}
+			}
+		}
+	}
+
+	return lines
 }
