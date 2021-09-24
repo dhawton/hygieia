@@ -1,4 +1,13 @@
-filter: inside
+filter:
+  type: "radius"
+  direction: "inside"
+radius:
+  center:
+    lat: 40.7128
+    lon: -74.0059
+  radius: 
+    distance: 60
+    unit: nm
 points:
 - lat: 43.434109
   lon: -88.890204

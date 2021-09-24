@@ -18,11 +18,6 @@
 
 package clean
 
-type Config struct {
-	Filter string  `yaml:"filter"`
-	Points []Point `yaml:"points"`
-}
-
 type Point struct {
 	Lat float64 `yaml:"lat"`
 	Lon float64 `yaml:"lon"`

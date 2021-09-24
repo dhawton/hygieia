@@ -24,6 +24,7 @@ import (
 	"strings"
 
 	"github.com/common-nighthawk/go-figure"
+	"hawton.dev/hygieia/internal/config"
 	"hawton.dev/hygieia/pkg/geo"
 	"hawton.dev/hygieia/pkg/sct2parse"
 	"hawton.dev/log4g"
@@ -31,7 +32,7 @@ import (
 
 var log = log4g.Category("clean")
 
-func Start(input string, output string, cfg Config) error {
+func Start(input string, output string, cfg config.Config) error {
 	intro := figure.NewFigure("Hygieia", "", false).Slicify()
 	for i := 0; i < len(intro); i++ {
 		log.Info(intro[i])
@@ -75,7 +76,7 @@ func Start(input string, output string, cfg Config) error {
 	log.Info("Checking for lines to filter")
 	for i, m := range sct2.Maps {
 		for j, line := range m.Lines {
-			if !shouldInclude(line, poly, cfg.Filter) {
+			if !shouldInclude(line, poly, cfg) {
 				sct2.Maps[i].Lines[j].Remove = true
 			}
 		}
@@ -102,19 +103,27 @@ func Start(input string, output string, cfg Config) error {
 	return nil
 }
 
-func shouldInclude(line sct2parse.Sct2Line, poly geo.Polygon, filter string) bool {
-	//log.Debug("Checking line %f, %f", line.Start.Lat, line.Start.Lon)
-	containsStart := geo.PointInPolygon(geo.Point{X: line.Start.Lat, Y: line.Start.Lon}, poly)
-	containsEnd := geo.PointInPolygon(geo.Point{X: line.End.Lat, Y: line.End.Lon}, poly)
+func shouldInclude(line sct2parse.Sct2Line, poly geo.Polygon, config config.Config) bool {
+	var containsStart bool
+	var containsEnd bool
+	filter := config.Filter
 
-	if strings.EqualFold(strings.ToLower(filter), "inside") {
+	if strings.EqualFold(strings.ToLower(filter.Type), "polygon") {
+		containsStart = geo.PointInPolygon(geo.Point{X: line.Start.Lat, Y: line.Start.Lon}, poly)
+		containsEnd = geo.PointInPolygon(geo.Point{X: line.End.Lat, Y: line.End.Lon}, poly)
+	} else if strings.EqualFold(strings.ToLower(filter.Type), "radius") {
+		containsStart = geo.CalcGreatCircleDistance(line.Start.Lat, line.Start.Lon, config.Radius.Center.Lat, config.Radius.Center.Lon) <= config.Radius.Radius
+		containsEnd = geo.CalcGreatCircleDistance(line.End.Lat, line.End.Lon, config.Radius.Center.Lat, config.Radius.Center.Lon) <= config.Radius.Radius
+	}
+
+	if strings.EqualFold(strings.ToLower(filter.Direction), "inside") {
 		if containsStart || containsEnd {
 			log.Debug("Filtering line: %v", line)
 			return false
 		}
 	}
 
-	if strings.EqualFold(strings.ToLower(filter), "outside") {
+	if strings.EqualFold(strings.ToLower(filter.Direction), "outside") {
 		if !containsStart || !containsEnd {
 			log.Debug("Filtering line: %v", line)
 			return false
