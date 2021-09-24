@@ -26,8 +26,8 @@ import (
 )
 
 var (
-	commentRegex  = regexp.MustCompile(`(?i)^\s*;`)
-	newBlock      = regexp.MustCompile(`(?i)^\[`)
+	commentRegex  = regexp.MustCompile(`^\s*;`)
+	newBlock      = regexp.MustCompile(`^\[`)
 	sidRegex      = regexp.MustCompile(`(?i)^\[SID\]`)
 	starRegex     = regexp.MustCompile(`(?i)^\[STAR\]`)
 	fixBlockRegex = regexp.MustCompile(`(?i)^\[FIXES\]`)
