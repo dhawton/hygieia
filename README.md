@@ -2,7 +2,20 @@
 
 Hygieia is the Ancient Egyptian god of cleanliness.  This project helps enable VATSIM Facility Engineers to easily filter out unwanted lines within their diagrams.
 
-## Configuration
+# Filter Command
+
+Filter cleans the map(s) of the sector file based upon the configuration of the filter
+
+```bash
+./hygieia clean [input file] [output file]
+```
+
+For more options, run:
+```bash
+./hygieia help clean
+```
+
+## Filter Configuration
 
 The configuration is a YAML file.
 
@@ -55,7 +68,20 @@ radius.center:
 ### Points
 * An object of lat and lons that create the polygon to use for filtering
 
-## Usage
+# FAA DAT File Converter Command
+
+Convert a FAA DAT file to a SCT2 file
+
+```bash
+./hygieia dat2sct [input dat] [output sct2]
+```
+
+For more options, see:
+```bash
+./hygieia help dat2sct
+```
+
+# Usage
 
 To run (using Linux as an example), run the following. In this example I am using Linux and will be cleaning "Chicago ARTCC Combined_1617077493.sct2" and want to output to cleaned.sct2.
 
@@ -70,6 +96,6 @@ Run the command help for more information.
 ./hygieia_linux_amd64 help
 ```
 
-## License
+# License
 
 This project is licensed under GPL 3. Please see LICENSE.md for more information.
