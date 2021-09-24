@@ -1,11 +1,11 @@
 filter:
   type: "radius"
-  direction: "inside"
+  direction: "outside"
 radius:
   center:
-    lat: 40.7128
-    lon: -74.0059
-  radius: 60.0
+    lat: 42.212984
+    lon: -83.379017
+  radius: 55.0
   unit: nm
 points:
 - lat: 43.434109
