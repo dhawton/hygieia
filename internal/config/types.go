@@ -19,9 +19,10 @@
 package config
 
 type Config struct {
-	Filter Filter  `yaml:"filter"`
-	Points []Point `yaml:"points"`
-	Radius Radius  `yaml:"radius"`
+	Filter  Filter  `yaml:"filter"`
+	Points  []Point `yaml:"points"`
+	Radius  Radius  `yaml:"radius"`
+	MapOnly bool    `yaml:"map_only"`
 }
 
 type Filter struct {

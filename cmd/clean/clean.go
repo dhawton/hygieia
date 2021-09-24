@@ -19,6 +19,7 @@
 package clean
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
@@ -66,12 +67,20 @@ func Start(input string, output string, cfg config.Config) error {
 	poly := geo.Polygon{Points: points}
 	log.Debug("Polygon is: %q", poly)
 
+	if cfg.MapOnly {
+		log.Info("Map Only mode enabled")
+		sct2parse.MapOnly = true
+	}
+
 	log.Info("Parsing sct2 file")
 	sct2, err := sct2parse.Parse(input)
 	if err != nil {
 		log.Error("Error parsing sct2: %s", err.Error())
 		return err
 	}
+
+	dat, _ := json.MarshalIndent(sct2, "", "  ")
+	log.Debug("Sct2: %s", string(dat))
 
 	log.Info("Checking for lines to filter")
 	for i, m := range sct2.Maps {
