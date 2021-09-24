@@ -26,16 +26,18 @@ import (
 )
 
 var (
-	commentRegex  = regexp.MustCompile(`(?i)^\s*;`)
-	newBlock      = regexp.MustCompile(`(?i)^\[`)
+	commentRegex  = regexp.MustCompile(`^\s*;`)
+	newBlock      = regexp.MustCompile(`^\[`)
 	sidRegex      = regexp.MustCompile(`(?i)^\[SID\]`)
 	starRegex     = regexp.MustCompile(`(?i)^\[STAR\]`)
 	fixBlockRegex = regexp.MustCompile(`(?i)^\[FIXES\]`)
-	mapRegex      = regexp.MustCompile(`(?i)^(\S+)\s+`)
-	lineRegex     = regexp.MustCompile(`(?i)^\s+([NS])([0-9.]+)\s+([EW])([0-9.]+)\s+([NS])([0-9.]+)\s+([EW])([0-9.]+)`)
-	lineFixRegex  = regexp.MustCompile(`(?i)^\s+([A-Z0-9]{5})\s+([A-Z0-9]{5})\s+([A-Z0-9]{5})\s+([A-Z0-9]{5})`)
+	mapRegex      = regexp.MustCompile(`^(\S+)\s+`)
+	lineRegex     = regexp.MustCompile(`(?i)^\s+([NS])([0-9.]+)\s+([EW])([0-9.]+)\s+([NS])([0-9.]+)\s+([EW])([0-9.]+)\s*(.*)$`)
+	lineFixRegex  = regexp.MustCompile(`(?i)^\s+([A-Z0-9]{5})\s+([A-Z0-9]{5})\s+([A-Z0-9]{5})\s+([A-Z0-9]{5})\s*(.*)$`)
 	fixRegex      = regexp.MustCompile(`(?i)([A-Z0-9]{5})\s+([NS])([0-9.]+)\s*([EW])([0-9.]+)`)
 )
+
+var MapOnly bool
 
 func Parse(file string) (*Sct2, error) {
 	sct2 := &Sct2{}
@@ -57,7 +59,7 @@ func Parse(file string) (*Sct2, error) {
 			continue
 		}
 
-		if !inFixes && !inMaps && !sidRegex.MatchString(line) && !starRegex.MatchString(line) && !fixBlockRegex.MatchString(line) {
+		if !MapOnly && !inFixes && !inMaps && !sidRegex.MatchString(line) && !starRegex.MatchString(line) && !fixBlockRegex.MatchString(line) {
 			sct2.RawLines = append(sct2.RawLines, line)
 			continue
 		}
@@ -103,7 +105,7 @@ func Parse(file string) (*Sct2, error) {
 			}
 		}
 
-		if inMaps {
+		if inMaps || MapOnly {
 			if mapRegex.MatchString(line) {
 				if isInSlice {
 					sct2.Maps = append(sct2.Maps, workingMap)
@@ -120,8 +122,9 @@ func Parse(file string) (*Sct2, error) {
 			} else if isInSlice && lineFixRegex.MatchString(line) {
 				res := lineFixRegex.FindAllStringSubmatch(line, -1)
 				l := Sct2Line{
-					Start: sct2.Fixes[res[0][1]],
-					End:   sct2.Fixes[res[0][3]],
+					Start:      sct2.Fixes[res[0][1]],
+					End:        sct2.Fixes[res[0][3]],
+					LineEnding: res[0][5],
 				}
 				workingMap.Lines = append(workingMap.Lines, l)
 			} else if isInSlice && lineRegex.MatchString(line) {
@@ -137,12 +140,18 @@ func Parse(file string) (*Sct2, error) {
 				}
 
 				workingMap.Lines = append(workingMap.Lines, Sct2Line{
-					Start: point1,
-					End:   point2,
+					Start:      point1,
+					End:        point2,
+					LineEnding: res[0][9],
 				})
 
 			}
 		}
+	}
+
+	if isInSlice {
+		sct2.Maps = append(sct2.Maps, workingMap)
+		isInSlice = false
 	}
 
 	return sct2, nil
@@ -153,9 +162,11 @@ func (s *Sct2) ToSct2() ([]string, error) {
 
 	lines = append(lines, s.RawLines...)
 
-	lines = append(lines, "[SID]")
-	lines = append(lines, s.getMaps(true)...)
-	lines = append(lines, "[STAR]")
+	if !MapOnly {
+		lines = append(lines, "[SID]")
+		lines = append(lines, s.getMaps(true)...)
+		lines = append(lines, "[STAR]")
+	}
 	lines = append(lines, s.getMaps(false)...)
 
 	return lines, nil
@@ -170,7 +181,7 @@ func (s *Sct2) getMaps(isSid bool) []string {
 				if !line.Remove {
 					start := ConvertToSct2(line.Start.Lat, line.Start.Lon)
 					end := ConvertToSct2(line.End.Lat, line.End.Lon)
-					lines = append(lines, fmt.Sprintf("\t%s %s %s %s", start[0], start[1], end[0], end[1]))
+					lines = append(lines, fmt.Sprintf("\t%s %s %s %s %s", start[0], start[1], end[0], end[1], line.LineEnding))
 				}
 			}
 		}

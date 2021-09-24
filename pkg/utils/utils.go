@@ -22,6 +22,7 @@ import (
 	"bufio"
 	"io/ioutil"
 	"os"
+	"strings"
 )
 
 func ReadFile(filename string) ([]byte, error) {
@@ -51,4 +52,17 @@ func ReadFileSlice(filename string) ([]string, error) {
 	}
 
 	return lines, scanner.Err()
+}
+
+func StringEquals(a string, b string) bool {
+	return strings.EqualFold(strings.ToLower(a), strings.ToLower(b))
+}
+
+func StringInSlice(a string, list []string) bool {
+	for _, b := range list {
+		if StringEquals(a, b) {
+			return true
+		}
+	}
+	return false
 }

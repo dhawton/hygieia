@@ -19,13 +19,19 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
+	"github.com/common-nighthawk/go-figure"
 	"github.com/urfave/cli/v2"
-	"hawton.dev/hygieia/internal/clean"
+	"hawton.dev/hygieia/cmd/clean"
+	"hawton.dev/hygieia/cmd/dat2sct"
+	internalConfig "hawton.dev/hygieia/internal/config"
 	"hawton.dev/hygieia/pkg/config"
 	"hawton.dev/log4g"
 )
+
+var log = log4g.Category("main")
 
 func main() {
 	app := cli.App{
@@ -50,16 +56,19 @@ func main() {
 						Usage:   "Path to config file",
 						Value:   "config.yaml",
 					},
+					&cli.BoolFlag{
+						Name:    "maponly",
+						Usage:   "Input is not a full sct2, just a map",
+						Aliases: []string{"m"},
+						Value:   false,
+					},
 				},
 				Action: func(c *cli.Context) error {
 					if c.Args().Len() != 2 {
 						return cli.Exit("Missing required arguments", 1)
 					}
 
-					verbose := c.Bool("verbose")
-					if verbose {
-						log4g.SetLogLevel(log4g.DEBUG)
-					}
+					globalrun(c)
 
 					input := c.Args().Get(0)
 					output := c.Args().Get(1)
@@ -73,17 +82,80 @@ func main() {
 						return cli.Exit("Input file does not exist", 1)
 					}
 
-					yml := clean.Config{}
+					yml := internalConfig.Config{}
 					err := config.LoadConfigYaml(cfg, &yml)
 					if err != nil {
 						return cli.Exit(err.Error(), 1)
 					}
 
+					if err := internalConfig.ValidateConfig(&yml); err != nil {
+						fmt.Printf("Error processing config: %s", err.Error())
+						return cli.Exit("Config file is invalid", 1)
+					}
+
+					if c.Bool("maponly") {
+						yml.MapOnly = true
+					}
+
 					return clean.Start(input, output, yml)
+				},
+			},
+			{
+				Name:      "dat2sct",
+				Usage:     "Convert FAA .dat files to sct2",
+				ArgsUsage: "[input file] [output file]",
+				Flags: []cli.Flag{
+					&cli.StringFlag{
+						Name:    "name",
+						Aliases: []string{"n"},
+						Usage:   "Name of map",
+						Value:   "HYGIEIA_CONVERTED",
+					},
+					&cli.BoolFlag{
+						Name:    "maponly",
+						Usage:   "Output as just a map",
+						Aliases: []string{"m"},
+						Value:   false,
+					},
+				},
+				Action: func(c *cli.Context) error {
+					if c.Args().Len() != 2 {
+						return cli.Exit("Missing required arguments", 1)
+					}
+
+					globalrun(c)
+
+					input := c.Args().Get(0)
+					output := c.Args().Get(1)
+
+					if _, err := os.Stat(input); os.IsNotExist(err) {
+						return cli.Exit("Input file does not exist", 1)
+					}
+
+					return dat2sct.Start(input, output, c.String("name"), c.Bool("maponly"))
 				},
 			},
 		},
 	}
 
 	app.Run(os.Args)
+}
+
+func globalrun(c *cli.Context) {
+	intro := figure.NewFigure("Hygieia", "", false).Slicify()
+	for i := 0; i < len(intro); i++ {
+		log.Info(intro[i])
+	}
+	log.Info("Thanks for using Hygieia")
+	log.Info("")
+	log.Info("Hygieia Copyright (C) 2021 Daniel A. Hawton <daniel@hawton.com>, Raaj Patel")
+	log.Info("This program comes with ABSOLUTELY NO WARRANTY.")
+	log.Info("This is free software, and you are welcome to redistribute it")
+	log.Info("under certain conditions; view license at https://www.gnu.org/licenses/gpl-3.0.en.html.")
+	log.Info("")
+
+	verbose := c.Bool("verbose")
+	if verbose {
+		log4g.SetLogLevel(log4g.DEBUG)
+	}
 }

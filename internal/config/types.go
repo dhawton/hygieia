@@ -16,29 +16,33 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package sct2parse
+package config
 
-type Sct2 struct {
-	RawLines []string
-	Maps     []Sct2Map
-	Fixes    map[string]Sct2Point
+type Config struct {
+	Filter  Filter  `yaml:"filter"`
+	Points  []Point `yaml:"points"`
+	Radius  Radius  `yaml:"radius"`
+	MapOnly bool    `yaml:"map_only"`
 }
 
-type Sct2Map struct {
-	Name        string
-	RawNameLine string
-	Lines       []Sct2Line
-	IsSID       bool
+type Filter struct {
+	Type      string `yaml:"type"`
+	Direction string `yaml:"direction"`
 }
 
-type Sct2Line struct {
-	Start      Sct2Point
-	End        Sct2Point
-	Remove     bool
-	LineEnding string
+type Radius struct {
+	Center   Point   `yaml:"center"`
+	Radius   float64 `yaml:"radius"`
+	Unit     string  `yaml:"unit"`
+	KMRadius float64 `yaml:"-"`
 }
 
-type Sct2Point struct {
-	Lat float64
-	Lon float64
+type Distance struct {
+	Radius float64 `yaml:"radius"`
+	Unit   string  `yaml:"unit"`
+}
+
+type Point struct {
+	Lat float64 `yaml:"lat"`
+	Lon float64 `yaml:"lon"`
 }
