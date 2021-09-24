@@ -52,6 +52,12 @@ func main() {
 						Usage:   "Path to config file",
 						Value:   "config.yaml",
 					},
+					&cli.BoolFlag{
+						Name:    "maponly",
+						Usage:   "Input is not a full sct2, just a map",
+						Aliases: []string{"m"},
+						Value:   false,
+					},
 				},
 				Action: func(c *cli.Context) error {
 					if c.Args().Len() != 2 {
@@ -84,6 +90,10 @@ func main() {
 					if err := internalConfig.ValidateConfig(&yml); err != nil {
 						fmt.Printf("Error processing config: %s", err.Error())
 						return cli.Exit("Config file is invalid", 1)
+					}
+
+					if c.Bool("maponly") {
+						yml.MapOnly = true
 					}
 
 					return clean.Start(input, output, yml)

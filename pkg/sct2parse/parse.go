@@ -37,6 +37,8 @@ var (
 	fixRegex      = regexp.MustCompile(`(?i)([A-Z0-9]{5})\s+([NS])([0-9.]+)\s*([EW])([0-9.]+)`)
 )
 
+var MapOnly bool
+
 func Parse(file string) (*Sct2, error) {
 	sct2 := &Sct2{}
 	sct2.Fixes = make(map[string]Sct2Point)
@@ -57,7 +59,7 @@ func Parse(file string) (*Sct2, error) {
 			continue
 		}
 
-		if !inFixes && !inMaps && !sidRegex.MatchString(line) && !starRegex.MatchString(line) && !fixBlockRegex.MatchString(line) {
+		if !MapOnly && !inFixes && !inMaps && !sidRegex.MatchString(line) && !starRegex.MatchString(line) && !fixBlockRegex.MatchString(line) {
 			sct2.RawLines = append(sct2.RawLines, line)
 			continue
 		}
@@ -103,7 +105,7 @@ func Parse(file string) (*Sct2, error) {
 			}
 		}
 
-		if inMaps {
+		if inMaps || MapOnly {
 			if mapRegex.MatchString(line) {
 				if isInSlice {
 					sct2.Maps = append(sct2.Maps, workingMap)
@@ -145,6 +147,11 @@ func Parse(file string) (*Sct2, error) {
 		}
 	}
 
+	if isInSlice {
+		sct2.Maps = append(sct2.Maps, workingMap)
+		isInSlice = false
+	}
+
 	return sct2, nil
 }
 
@@ -153,9 +160,11 @@ func (s *Sct2) ToSct2() ([]string, error) {
 
 	lines = append(lines, s.RawLines...)
 
-	lines = append(lines, "[SID]")
-	lines = append(lines, s.getMaps(true)...)
-	lines = append(lines, "[STAR]")
+	if !MapOnly {
+		lines = append(lines, "[SID]")
+		lines = append(lines, s.getMaps(true)...)
+		lines = append(lines, "[STAR]")
+	}
 	lines = append(lines, s.getMaps(false)...)
 
 	return lines, nil
