@@ -32,9 +32,10 @@ type Sct2Map struct {
 }
 
 type Sct2Line struct {
-	Start  Sct2Point
-	End    Sct2Point
-	Remove bool
+	Start      Sct2Point
+	End        Sct2Point
+	Remove     bool
+	LineEnding string
 }
 
 type Sct2Point struct {
