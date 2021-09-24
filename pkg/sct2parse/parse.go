@@ -32,8 +32,8 @@ var (
 	starRegex     = regexp.MustCompile(`(?i)^\[STAR\]`)
 	fixBlockRegex = regexp.MustCompile(`(?i)^\[FIXES\]`)
 	mapRegex      = regexp.MustCompile(`(?i)^(\S+)\s+`)
-	lineRegex     = regexp.MustCompile(`(?i)^\s+([NS])([0-9.]+)\s+([EW])([0-9.]+)\s+([NS])([0-9.]+)\s+([EW])([0-9.]+)`)
-	lineFixRegex  = regexp.MustCompile(`(?i)^\s+([A-Z0-9]{5})\s+([A-Z0-9]{5})\s+([A-Z0-9]{5})\s+([A-Z0-9]{5})`)
+	lineRegex     = regexp.MustCompile(`(?i)^\s+([NS])([0-9.]+)\s+([EW])([0-9.]+)\s+([NS])([0-9.]+)\s+([EW])([0-9.]+)\s+(.+)$`)
+	lineFixRegex  = regexp.MustCompile(`(?i)^\s+([A-Z0-9]{5})\s+([A-Z0-9]{5})\s+([A-Z0-9]{5})\s+([A-Z0-9]{5})\s+(.+)$`)
 	fixRegex      = regexp.MustCompile(`(?i)([A-Z0-9]{5})\s+([NS])([0-9.]+)\s*([EW])([0-9.]+)`)
 )
 
@@ -120,8 +120,9 @@ func Parse(file string) (*Sct2, error) {
 			} else if isInSlice && lineFixRegex.MatchString(line) {
 				res := lineFixRegex.FindAllStringSubmatch(line, -1)
 				l := Sct2Line{
-					Start: sct2.Fixes[res[0][1]],
-					End:   sct2.Fixes[res[0][3]],
+					Start:      sct2.Fixes[res[0][1]],
+					End:        sct2.Fixes[res[0][3]],
+					LineEnding: res[0][5],
 				}
 				workingMap.Lines = append(workingMap.Lines, l)
 			} else if isInSlice && lineRegex.MatchString(line) {
@@ -137,8 +138,9 @@ func Parse(file string) (*Sct2, error) {
 				}
 
 				workingMap.Lines = append(workingMap.Lines, Sct2Line{
-					Start: point1,
-					End:   point2,
+					Start:      point1,
+					End:        point2,
+					LineEnding: res[0][9],
 				})
 
 			}
@@ -170,7 +172,7 @@ func (s *Sct2) getMaps(isSid bool) []string {
 				if !line.Remove {
 					start := ConvertToSct2(line.Start.Lat, line.Start.Lon)
 					end := ConvertToSct2(line.End.Lat, line.End.Lon)
-					lines = append(lines, fmt.Sprintf("\t%s %s %s %s", start[0], start[1], end[0], end[1]))
+					lines = append(lines, fmt.Sprintf("\t%s %s %s %s %s", start[0], start[1], end[0], end[1], line.LineEnding))
 				}
 			}
 		}
