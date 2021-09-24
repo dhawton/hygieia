@@ -7,7 +7,16 @@ Hygieia is the Ancient Egyptian god of cleanliness.  This project helps enable V
 The configuration is a YAML file.
 
 ```yaml
-filter: inside
+filter:
+  type: "radius"
+  direction: "inside"
+radius:
+  center:
+    lat: 40.7128
+    lon: -74.0059
+  radius: 
+    distance: 60
+    unit: nm
 points:
 - lat: 43.434109
   lon: -88.890204
@@ -22,8 +31,28 @@ points:
 ```
 
 ### Filter
-* inside: Any line that has a point within the polygon will be filtered
-* outside: Any line that has a point outside of the polygon will be filtered
+
+This defines the filter to be used on the map
+
+filter.type accepted values:
+* radius
+* polygon
+
+filter.direction accepted values:
+* inside
+* outside
+
+### Radius
+
+Define the radius filter
+
+radius.center:
+* lat defines the latitude of the center of the circle (decimal degrees represented as a float)
+* lon defines the longitude of the center of the circle
+
+radius.radius:
+* distance
+* unit (expected: km, nm, sm, or mi [kilometer, nautical mile, statute mile, and statute mile alias respectively])
 
 ### Points
 * An object of lat and lons that create the polygon to use for filtering

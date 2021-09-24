@@ -19,10 +19,12 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/urfave/cli/v2"
-	"hawton.dev/hygieia/internal/clean"
+	"hawton.dev/hygieia/cmd/clean"
+	internalConfig "hawton.dev/hygieia/internal/config"
 	"hawton.dev/hygieia/pkg/config"
 	"hawton.dev/log4g"
 )
@@ -73,10 +75,15 @@ func main() {
 						return cli.Exit("Input file does not exist", 1)
 					}
 
-					yml := clean.Config{}
+					yml := internalConfig.Config{}
 					err := config.LoadConfigYaml(cfg, &yml)
 					if err != nil {
 						return cli.Exit(err.Error(), 1)
+					}
+
+					if err := internalConfig.ValidateConfig(&yml); err != nil {
+						fmt.Printf("Error processing config: %s", err.Error())
+						return cli.Exit("Config file is invalid", 1)
 					}
 
 					return clean.Start(input, output, yml)
