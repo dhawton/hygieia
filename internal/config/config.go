@@ -22,7 +22,6 @@ import (
 	"fmt"
 	"strings"
 
-	"hawton.dev/hygieia/pkg/geo"
 	"hawton.dev/hygieia/pkg/utils"
 )
 
@@ -42,16 +41,6 @@ func ValidateConfig(cfg *Config) error {
 
 		if !utils.StringInSlice(cfg.Radius.Unit, []string{"km", "mi", "sm", "nm"}) {
 			return fmt.Errorf("invalid filter radius unit %s, expected km, mi, sm or nm", cfg.Radius.Unit)
-		}
-
-		if utils.StringInSlice(cfg.Radius.Unit, []string{"mi", "sm", "nm"}) {
-			if utils.StringEquals(cfg.Radius.Unit, "nm") {
-				cfg.Radius.KMRadius = geo.ConvertNMToKM(cfg.Radius.Radius)
-			} else {
-				cfg.Radius.KMRadius = geo.ConvertSMToKM(cfg.Radius.Radius)
-			}
-		} else {
-			cfg.Radius.KMRadius = cfg.Radius.Radius
 		}
 	}
 

@@ -46,6 +46,19 @@ func Start(input string, output string, cfg config.Config) error {
 		log.Debug("Polygon is: %q", poly)
 	}
 
+	if utils.StringEquals(cfg.Filter.Type, "radius") {
+		if utils.StringInSlice(cfg.Radius.Unit, []string{"mi", "sm", "nm"}) {
+			if utils.StringEquals(cfg.Radius.Unit, "nm") {
+				cfg.Radius.KMRadius = geo.ConvertNMToKM(cfg.Radius.Radius)
+			} else {
+				cfg.Radius.KMRadius = geo.ConvertSMToKM(cfg.Radius.Radius)
+			}
+		} else {
+			cfg.Radius.KMRadius = cfg.Radius.Radius
+		}
+		log.Debug("KMRadius set to %f", cfg.Radius.KMRadius)
+	}
+
 	if cfg.MapOnly {
 		log.Info("Map Only mode enabled")
 		sct2parse.MapOnly = true

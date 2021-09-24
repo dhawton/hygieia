@@ -32,8 +32,8 @@ var (
 	starRegex     = regexp.MustCompile(`(?i)^\[STAR\]`)
 	fixBlockRegex = regexp.MustCompile(`(?i)^\[FIXES\]`)
 	mapRegex      = regexp.MustCompile(`^(\S+)\s+`)
-	lineRegex     = regexp.MustCompile(`(?i)^\s+([NS])([0-9.]+)\s+([EW])([0-9.]+)\s+([NS])([0-9.]+)\s+([EW])([0-9.]+)\s+(.+)$`)
-	lineFixRegex  = regexp.MustCompile(`(?i)^\s+([A-Z0-9]{5})\s+([A-Z0-9]{5})\s+([A-Z0-9]{5})\s+([A-Z0-9]{5})\s+(.+)$`)
+	lineRegex     = regexp.MustCompile(`(?i)^\s+([NS])([0-9.]+)\s+([EW])([0-9.]+)\s+([NS])([0-9.]+)\s+([EW])([0-9.]+)\s*(.*)$`)
+	lineFixRegex  = regexp.MustCompile(`(?i)^\s+([A-Z0-9]{5})\s+([A-Z0-9]{5})\s+([A-Z0-9]{5})\s+([A-Z0-9]{5})\s*(.*)$`)
 	fixRegex      = regexp.MustCompile(`(?i)([A-Z0-9]{5})\s+([NS])([0-9.]+)\s*([EW])([0-9.]+)`)
 )
 
