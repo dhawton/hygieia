@@ -1,6 +1,6 @@
 /*
  * Hygieia - sct2 cleaner
- * Copyright (C) 2021 Daniel A. Hawton <daniel@hawton.com>
+ * Copyright (C) 2021 Daniel A. Hawton <daniel@hawton.com>, Raaj Patel
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -58,6 +58,8 @@ func Start(input string, output string, mapname string, maponly bool) error {
 			"[SID]",
 			"[STAR]",
 		}
+	} else {
+		sct2parse.MapOnly = true
 	}
 
 	log.Info("Defining map details")

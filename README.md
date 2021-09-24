@@ -99,3 +99,8 @@ Run the command help for more information.
 # License
 
 This project is licensed under GPL 3. Please see LICENSE.md for more information.
+
+# Credits
+
+Daniel Hawton - Main author
+Raaj Patel - DAT file conversion and SCT2 template
