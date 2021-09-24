@@ -26,6 +26,7 @@ import (
 	"hawton.dev/hygieia/cmd/clean"
 	internalConfig "hawton.dev/hygieia/internal/config"
 	"hawton.dev/hygieia/pkg/config"
+	"hawton.dev/hygieia/pkg/dat2sct"
 	"hawton.dev/log4g"
 )
 
@@ -87,6 +88,35 @@ func main() {
 					}
 
 					return clean.Start(input, output, yml)
+				},
+			},
+			{
+				Name:      "dat2sct",
+				Usage:     "Convert your FAA .dat files to SCT2 files",
+				ArgsUsage: "[Input File]",
+				Flags: []cli.Flag{
+					&cli.StringFlag{
+						Name:    "Map Name",
+						Aliases: []string{"n"},
+						Usage:   "Diagram map name",
+						Value:   "Default_Map",
+					},
+				},
+				Action: func(c *cli.Context) error {
+					if c.Args().Len() != 1 {
+						return cli.Exit("Missing required arguments", 1)
+					}
+
+					input := c.Args().Get(0)
+					//mapName := c.String("Map Name")
+
+					if _, err := os.Stat(input); os.IsNotExist(err) {
+						return cli.Exit("dat "+input+" file does not exist", 1)
+					}
+
+					dat2sct.Convert(input)
+
+					return nil
 				},
 			},
 		},
