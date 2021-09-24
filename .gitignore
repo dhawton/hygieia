@@ -1,3 +1,4 @@
 .env
 hygieia*
 samples/dtw*.dat
+build
