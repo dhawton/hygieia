@@ -14,9 +14,8 @@ radius:
   center:
     lat: 40.7128
     lon: -74.0059
-  radius: 
-    distance: 60
-    unit: nm
+  radius: 60
+  unit: nm
 points:
 - lat: 43.434109
   lon: -88.890204
@@ -50,9 +49,8 @@ radius.center:
 * lat defines the latitude of the center of the circle (decimal degrees represented as a float)
 * lon defines the longitude of the center of the circle
 
-radius.radius:
-* distance
-* unit (expected: km, nm, sm, or mi [kilometer, nautical mile, statute mile, and statute mile alias respectively])
+* radius.radius is the radius from center
+* radius.unit (expected: km, nm, sm, or mi [kilometer, nautical mile, statute mile, and statute mile alias respectively])
 
 ### Points
 * An object of lat and lons that create the polygon to use for filtering
