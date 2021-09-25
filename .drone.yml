@@ -1,0 +1,10 @@
+kind: pipeline
+type: kubernetes
+name: test
+
+steps:
+- name: test
+  image: golang
+  commands:
+  - go test
+  - go build
