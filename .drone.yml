@@ -30,12 +30,6 @@ steps:
   image: golang
   commands:
   - bash scripts/compile.sh
-- name: generate changelog
-  image: naorlivne/drone-github-changelog-generator
-  settings:
-    github_user: dhawton
-    github_project: hygieia
-    output_path: CHANGELOG.md
 - name: publish
   image: plugins/github-release
   settings:
@@ -43,5 +37,4 @@ steps:
       from_secret: GITHUB_TOKEN
     files:
     - build/*
-    title: v$DRONE_TAG
-    note: CHANGELOG.md
+    title: Release $DRONE_TAG
