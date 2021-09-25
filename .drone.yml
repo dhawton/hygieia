@@ -2,10 +2,16 @@ kind: pipeline
 type: kubernetes
 name: test
 
+trigger:
+  branches:
+  - dev
+  event:
+  - push
+  - pull_request
+
 steps:
 - name: test
   image: golang
   commands:
   - go test
   - go build
-  
