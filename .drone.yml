@@ -38,11 +38,9 @@ steps:
     output_path: CHANGELOG.md
 - name: publish
   image: plugins/github-release
-  environment:
-    GITHUB_TOKEN:
-      from_secret: GITHUB_TOKEN
   settings:
-    api_key: $GITHUB_TOKEN
+    api_key:
+      from_secret: GITHUB_TOKEN
     files:
     - build/*
     title: v$DRONE_TAG
