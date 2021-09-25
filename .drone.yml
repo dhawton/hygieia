@@ -1,0 +1,49 @@
+kind: pipeline
+type: kubernetes
+name: test
+
+trigger:
+  event:
+  - push
+  - pull_request
+
+steps:
+- name: test
+  image: golang
+  commands:
+  - go test
+  - go vet
+  - go build
+---
+kind: pipeline
+type: kubernetes
+name: build and publish
+
+trigger:
+  branches:
+  - main
+  event:
+  - tag
+
+steps:
+- name: build
+  image: golang
+  commands:
+  - bash scripts/compile.sh
+- name: generate changelog
+  image: naorlivne/drone-github-changelog-generator
+  settings:
+    github_user: dhawton
+    github_project: hygieia
+    output_path: CHANGELOG.md
+- name: publish
+  image: plugins/github-release
+  environment:
+    GITHUB_TOKEN:
+      from_secret: GITHUB_TOKEN
+  settings:
+    api_key: $GITHUB_TOKEN
+    files:
+    - build/*
+    title: v$DRONE_TAG
+    note: CHANGELOG.md
