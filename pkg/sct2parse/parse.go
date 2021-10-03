@@ -181,7 +181,7 @@ func (s *Sct2) getMaps(isSid bool) []string {
 				if !line.Remove {
 					start := ConvertToSct2(line.Start.Lat, line.Start.Lon)
 					end := ConvertToSct2(line.End.Lat, line.End.Lon)
-					lines = append(lines, fmt.Sprintf("\t%s %s %s %s %s", start[0], start[1], end[0], end[1], line.LineEnding))
+					lines = append(lines, fmt.Sprintf("%26s%s %s %s %s %s", " ", start[0], start[1], end[0], end[1], line.LineEnding))
 				}
 			}
 		}

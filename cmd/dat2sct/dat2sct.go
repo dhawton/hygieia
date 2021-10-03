@@ -129,7 +129,7 @@ func Start(input string, output string, mapname string, maponly bool) error {
 	log.Info("Defining map details")
 	sct2.Maps = append(sct2.Maps, sct2parse.Sct2Map{
 		Name:        mapname,
-		RawNameLine: fmt.Sprintf("%s\tN000.00.00.000 W000.00.00.000 N000.00.00.000 W000.00.00.000", mapname),
+		RawNameLine: fmt.Sprintf("%-26s\tN000.00.00.000 W000.00.00.000 N000.00.00.000 W000.00.00.000", mapname),
 	})
 	log.Info("Parsing and converting dat")
 	err := dat2parse.Parse(&sct2, input)
