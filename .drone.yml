@@ -27,9 +27,9 @@ trigger:
 
 steps:
 - name: build
-  image: golang
+  image: golang:1.16
   commands:
-  - bash scripts/compile.sh
+  - make build
 - name: publish
   image: plugins/github-release
   settings:
