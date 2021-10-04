@@ -21,13 +21,77 @@ package dat2sct
 import (
 	"fmt"
 	"os"
+	"strings"
 
+	"github.com/urfave/cli/v2"
+	"hawton.dev/hygieia/internal/utils"
 	"hawton.dev/hygieia/pkg/dat2parse"
 	"hawton.dev/hygieia/pkg/sct2parse"
 	"hawton.dev/log4g"
 )
 
 var log = log4g.Category("dat2sct")
+
+func Command() *cli.Command {
+	return &cli.Command{
+		Name:      "dat2sct",
+		Usage:     "Convert FAA .dat files to sct2",
+		ArgsUsage: "[input file] [output file]",
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:    "name",
+				Aliases: []string{"n"},
+				Usage:   "Name of map",
+				Value:   "HYGIEIA_CONVERTED",
+			},
+			&cli.BoolFlag{
+				Name:    "maponly",
+				Usage:   "Output as just a map",
+				Aliases: []string{"m"},
+				Value:   false,
+			},
+			&cli.BoolFlag{
+				Name:    "recursive",
+				Usage:   "Recursively convert all .dat files in the directory",
+				Value:   false,
+				Aliases: []string{"r"},
+			},
+			&cli.BoolFlag{
+				Name:    "recursive_split",
+				Usage:   "Split the output into multiple files, one per map, in output directory (only with recursive)",
+				Value:   false,
+				Aliases: []string{"rs"},
+			},
+		},
+		Action: func(c *cli.Context) error {
+			if c.Args().Len() != 2 {
+				return cli.Exit("Missing required arguments", 1)
+			}
+
+			utils.GlobalRun(c)
+
+			input := c.Args().Get(0)
+			output := c.Args().Get(1)
+
+			if _, err := os.Stat(input); os.IsNotExist(err) {
+				return cli.Exit("Input file/directory does not exist", 1)
+			}
+
+			if c.Bool("recursive") && c.Bool("recursive_split") {
+				if _, err := os.Stat(output); os.IsNotExist(err) {
+					log.Info("Creating output directory")
+					os.Mkdir(output, 0755)
+				}
+			}
+
+			if c.Bool("recursive") && !strings.EqualFold(c.String("name"), "HYGIEIA_CONVERTED") {
+				log.Warning("Ignoring name argument. In recursive mode, map name will be the dat filename.")
+			}
+
+			return Start(input, output, c.String("name"), c.Bool("maponly"))
+		},
+	}
+}
 
 func Start(input string, output string, mapname string, maponly bool) error {
 	sct2 := sct2parse.Sct2{}
@@ -65,7 +129,7 @@ func Start(input string, output string, mapname string, maponly bool) error {
 	log.Info("Defining map details")
 	sct2.Maps = append(sct2.Maps, sct2parse.Sct2Map{
 		Name:        mapname,
-		RawNameLine: fmt.Sprintf("%s\tN000.00.00.000 W000.00.00.000 N000.00.00.000 W000.00.00.000", mapname),
+		RawNameLine: fmt.Sprintf("%-26s\tN000.00.00.000 W000.00.00.000 N000.00.00.000 W000.00.00.000", mapname),
 	})
 	log.Info("Parsing and converting dat")
 	err := dat2parse.Parse(&sct2, input)

@@ -24,7 +24,10 @@ import (
 	"os"
 	"strings"
 
-	"hawton.dev/hygieia/internal/config"
+	"github.com/urfave/cli/v2"
+	internalConfig "hawton.dev/hygieia/internal/config"
+	internalUtils "hawton.dev/hygieia/internal/utils"
+	"hawton.dev/hygieia/pkg/config"
 	"hawton.dev/hygieia/pkg/geo"
 	"hawton.dev/hygieia/pkg/sct2parse"
 	"hawton.dev/hygieia/pkg/utils"
@@ -33,7 +36,65 @@ import (
 
 var log = log4g.Category("clean")
 
-func Start(input string, output string, cfg config.Config) error {
+func Command() *cli.Command {
+	return &cli.Command{
+		Name:      "clean",
+		Usage:     "Clean your sct2 maps of unneeded information",
+		ArgsUsage: "[input file] [output file]",
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:    "config",
+				Aliases: []string{"c"},
+				Usage:   "Path to config file",
+				Value:   "config.yaml",
+			},
+			&cli.BoolFlag{
+				Name:    "maponly",
+				Usage:   "Input is not a full sct2, just a map",
+				Aliases: []string{"m"},
+				Value:   false,
+			},
+		},
+		Action: func(c *cli.Context) error {
+			if c.Args().Len() != 2 {
+				return cli.Exit("Missing required arguments", 1)
+			}
+
+			internalUtils.GlobalRun(c)
+
+			input := c.Args().Get(0)
+			output := c.Args().Get(1)
+			cfg := c.String("config")
+
+			if _, err := os.Stat(cfg); os.IsNotExist(err) {
+				return cli.Exit("Config "+cfg+" file does not exist", 1)
+			}
+
+			if _, err := os.Stat(input); os.IsNotExist(err) {
+				return cli.Exit("Input file does not exist", 1)
+			}
+
+			yml := internalConfig.Config{}
+			err := config.LoadConfigYaml(cfg, &yml)
+			if err != nil {
+				return cli.Exit(err.Error(), 1)
+			}
+
+			if err := internalConfig.ValidateConfig(&yml); err != nil {
+				fmt.Printf("Error processing config: %s", err.Error())
+				return cli.Exit("Config file is invalid", 1)
+			}
+
+			if c.Bool("maponly") {
+				yml.MapOnly = true
+			}
+
+			return Start(input, output, yml)
+		},
+	}
+}
+
+func Start(input string, output string, cfg internalConfig.Config) error {
 	if utils.StringEquals(cfg.Filter.Type, "polygon") {
 		log.Info("Building polygon")
 
@@ -98,7 +159,7 @@ func Start(input string, output string, cfg config.Config) error {
 	return nil
 }
 
-func CleanSCT2(sct2 *sct2parse.Sct2, cfg config.Config) {
+func CleanSCT2(sct2 *sct2parse.Sct2, cfg internalConfig.Config) {
 	for i, m := range sct2.Maps {
 		for j, line := range m.Lines {
 			if !shouldInclude(line, geo.Polygon{}, cfg) {
@@ -108,7 +169,7 @@ func CleanSCT2(sct2 *sct2parse.Sct2, cfg config.Config) {
 	}
 }
 
-func shouldInclude(line sct2parse.Sct2Line, poly geo.Polygon, config config.Config) bool {
+func shouldInclude(line sct2parse.Sct2Line, poly geo.Polygon, config internalConfig.Config) bool {
 	var containsStart bool
 	var containsEnd bool
 	filter := config.Filter
