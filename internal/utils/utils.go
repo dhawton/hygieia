@@ -16,49 +16,31 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package main
+package utils
 
 import (
-	"os"
-
+	"github.com/common-nighthawk/go-figure"
 	"github.com/urfave/cli/v2"
-	"hawton.dev/hygieia/cmd/clean"
-	"hawton.dev/hygieia/cmd/dat2sct"
 	"hawton.dev/log4g"
 )
 
-var log = log4g.Category("main")
+var log = log4g.Category("internal/utils")
 
-func main() {
-	app := cli.App{
-		Name:  "Hygieia",
-		Usage: "Clean your sct2 maps of unneeded information",
-		Flags: []cli.Flag{
-			&cli.BoolFlag{
-				Name:    "verbose",
-				Usage:   "Enable verbose output",
-				Aliases: []string{"v"},
-			},
-		},
-		Commands: []*cli.Command{
-			clean.Command(),
-			dat2sct.Command(),
-		},
-		Action: func(c *cli.Context) error {
-			if c.Bool("verbose") {
-				log4g.SetLogLevel(log4g.DEBUG)
-			}
-			log4g.Category("main").Info("Test from action")
-			return nil
-		},
-		After: func(c *cli.Context) error {
-			if c.Bool("verbose") {
-				log4g.Category("main").Debug("Setting debug")
-				log4g.SetLogLevel(log4g.DEBUG)
-			}
-			return nil
-		},
+func GlobalRun(c *cli.Context) {
+	intro := figure.NewFigure("Hygieia", "", false).Slicify()
+	for i := 0; i < len(intro); i++ {
+		log.Info(intro[i])
 	}
+	log.Info("Thanks for using Hygieia")
+	log.Info("")
+	log.Info("Hygieia Copyright (C) 2021 Daniel A. Hawton <daniel@hawton.com>, Raaj Patel")
+	log.Info("This program comes with ABSOLUTELY NO WARRANTY.")
+	log.Info("This is free software, and you are welcome to redistribute it")
+	log.Info("under certain conditions; view license at https://www.gnu.org/licenses/gpl-3.0.en.html.")
+	log.Info("")
 
-	app.Run(os.Args)
+	verbose := c.Bool("verbose")
+	if verbose {
+		log4g.SetLogLevel(log4g.DEBUG)
+	}
 }
