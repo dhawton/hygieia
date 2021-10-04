@@ -1,4 +1,8 @@
-LDFLAGS=-w -X 'hawton.dev/hygieia/internal/version.BuildTime=$(shell TZ='UTC' date)' -X 'hawton.dev/hygieia/internal/version.GitCommit=$(shell git rev-parse --short HEAD)' -X 'hawton.dev/hygieia/internal/version.Version=$(shell git describe --tags --abbrev=0 HEAD || echo dev)' -X 'hawton.dev/hygieia/internal/version.GoVersion=$(shell go version | awk '{print $$3}')'
+VERSION="dev"
+ifdef DRONE_TAG
+  VERSION=$(DRONE_TAG)
+endif
+LDFLAGS=-w -X 'hawton.dev/hygieia/internal/version.BuildTime=$(shell TZ='UTC' date)' -X 'hawton.dev/hygieia/internal/version.GitCommit=$(shell git rev-parse --short HEAD)' -X 'hawton.dev/hygieia/internal/version.Version=$(VERSION)' -X 'hawton.dev/hygieia/internal/version.GoVersion=$(shell go version | awk '{print $$3}')'
 COMPILER=go build -ldflags="$(LDFLAGS)"
 
 build:
