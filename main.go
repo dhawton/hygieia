@@ -42,6 +42,14 @@ func main() {
 		Commands: []*cli.Command{
 			clean.Command(),
 			dat2sct.Command(),
+			{
+				Name:  "version",
+				Usage: "Get version information",
+				Action: func(c *cli.Context) error {
+					// Can just return since version is part of the global run.
+					return nil
+				},
+			},
 		},
 		Before: func(c *cli.Context) error {
 			utils.GlobalRun(c)
