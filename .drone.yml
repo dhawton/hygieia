@@ -37,4 +37,4 @@ steps:
       from_secret: GITHUB_TOKEN
     files:
     - build/*
-    title: Release $DRONE_TAG
+    title: Release Draft
