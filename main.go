@@ -24,10 +24,9 @@ import (
 	"github.com/urfave/cli/v2"
 	"hawton.dev/hygieia/cmd/clean"
 	"hawton.dev/hygieia/cmd/dat2sct"
+	"hawton.dev/hygieia/internal/utils"
 	"hawton.dev/log4g"
 )
-
-var log = log4g.Category("main")
 
 func main() {
 	app := cli.App{
@@ -44,11 +43,8 @@ func main() {
 			clean.Command(),
 			dat2sct.Command(),
 		},
-		Action: func(c *cli.Context) error {
-			if c.Bool("verbose") {
-				log4g.SetLogLevel(log4g.DEBUG)
-			}
-			log4g.Category("main").Info("Test from action")
+		Before: func(c *cli.Context) error {
+			utils.GlobalRun(c)
 			return nil
 		},
 		After: func(c *cli.Context) error {

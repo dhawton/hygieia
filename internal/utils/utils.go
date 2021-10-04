@@ -19,25 +19,26 @@
 package utils
 
 import (
+	"fmt"
+
 	"github.com/common-nighthawk/go-figure"
 	"github.com/urfave/cli/v2"
+	"hawton.dev/hygieia/internal/version"
 	"hawton.dev/log4g"
 )
-
-var log = log4g.Category("internal/utils")
 
 func GlobalRun(c *cli.Context) {
 	intro := figure.NewFigure("Hygieia", "", false).Slicify()
 	for i := 0; i < len(intro); i++ {
-		log.Info(intro[i])
+		fmt.Println(intro[i])
 	}
-	log.Info("Thanks for using Hygieia")
-	log.Info("")
-	log.Info("Hygieia Copyright (C) 2021 Daniel A. Hawton <daniel@hawton.com>, Raaj Patel")
-	log.Info("This program comes with ABSOLUTELY NO WARRANTY.")
-	log.Info("This is free software, and you are welcome to redistribute it")
-	log.Info("under certain conditions; view license at https://www.gnu.org/licenses/gpl-3.0.en.html.")
-	log.Info("")
+	fmt.Println("Hygieia " + version.FriendlyVersion())
+	fmt.Println("")
+	fmt.Println("Hygieia Copyright (C) 2021 Daniel A. Hawton <daniel@hawton.com>, Raaj Patel")
+	fmt.Println("This program comes with ABSOLUTELY NO WARRANTY.")
+	fmt.Println("This is free software, and you are welcome to redistribute it")
+	fmt.Println("under certain conditions; view license at https://www.gnu.org/licenses/gpl-3.0.en.html.")
+	fmt.Println("")
 
 	verbose := c.Bool("verbose")
 	if verbose {
